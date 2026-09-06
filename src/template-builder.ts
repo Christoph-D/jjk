@@ -342,6 +342,14 @@ export function buildLogTemplate(opts?: { includeFiles?: boolean }): string {
 }
 
 /**
+ * Builds the `jj log` JSON template for the Details view: the log fields, per-file change
+ * data, and the overall diff statistics, all in a single line of output.
+ */
+export function buildDetailsTemplate(): string {
+  return generateTemplate({ ...LOG_ENTRY_FIELDS, ...DIFF_FILES_FIELD, ...DIFF_STATS_FIELDS });
+}
+
+/**
  * Builds the `jj operation log` JSON template.
  *
  * jj 0.41 deprecated `operation.tags()` in favor of `operation.attributes()`.

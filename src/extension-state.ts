@@ -2,19 +2,25 @@ import * as vscode from "vscode";
 import type { JJRepository } from "./repository";
 import { WorkspaceSourceControlManager, type ForceRefresh } from "./source-control";
 import type { JJGraphWebview } from "./graph-webview";
+import type { DetailsWebview } from "./details-webview";
 import type { OperationLogManager } from "./operation-log-tree-view";
 
 export interface ExtensionState {
   context: vscode.ExtensionContext;
   workspaceSCM: WorkspaceSourceControlManager;
   graphWebview: JJGraphWebview | undefined;
+  detailsWebview: DetailsWebview | undefined;
   operationLogManager: OperationLogManager | undefined;
   throttledPoll: ((forceRefresh: ForceRefresh) => Promise<void>) | undefined;
   getSelectedRepo(): JJRepository | undefined;
   setSelectedRepo(repository: JJRepository): void;
   onDidSetSelectedRepository: vscode.Event<void>;
   onInit(callback: () => void): void;
-  initialize(graphWebview: JJGraphWebview, operationLogManager: OperationLogManager): void;
+  initialize(
+    graphWebview: JJGraphWebview,
+    detailsWebview: DetailsWebview,
+    operationLogManager: OperationLogManager,
+  ): void;
 }
 
 export function createExtensionState(
@@ -26,6 +32,7 @@ export function createExtensionState(
   context.subscriptions.push(_onDidSetSelectedRepository);
 
   let _graphWebview: JJGraphWebview | undefined;
+  let _detailsWebview: DetailsWebview | undefined;
   let _operationLogManager: OperationLogManager | undefined;
   const initCallbacks: (() => void)[] = [];
 
@@ -49,6 +56,9 @@ export function createExtensionState(
     get graphWebview() {
       return _graphWebview;
     },
+    get detailsWebview() {
+      return _detailsWebview;
+    },
     get operationLogManager() {
       return _operationLogManager;
     },
@@ -58,8 +68,9 @@ export function createExtensionState(
     onInit(callback: () => void) {
       initCallbacks.push(callback);
     },
-    initialize(graphWebview: JJGraphWebview, operationLogManager: OperationLogManager) {
+    initialize(graphWebview: JJGraphWebview, detailsWebview: DetailsWebview, operationLogManager: OperationLogManager) {
       _graphWebview = graphWebview;
+      _detailsWebview = detailsWebview;
       _operationLogManager = operationLogManager;
       for (const cb of initCallbacks) {
         cb();

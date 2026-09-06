@@ -19,6 +19,7 @@ function copyFile(src, dest) {
 function copyAssets() {
   fs.copyFileSync("src/webview/graph.html", "dist/webview/graph.html");
   fs.copyFileSync("src/webview/split.html", "dist/webview/split.html");
+  fs.copyFileSync("src/webview/details.html", "dist/webview/details.html");
   copyFile("src/config.toml", "dist/config.toml");
 
   fs.rmSync("dist/codicons", { recursive: true, force: true });
@@ -78,6 +79,13 @@ async function main() {
       loader: { ".module.css": "local-css" },
     }),
     createContext("src/webview/split/main.tsx", "dist/webview/split.js", {
+      format: "iife",
+      platform: "browser",
+      jsx: "automatic",
+      jsxImportSource: "preact",
+      loader: { ".module.css": "local-css" },
+    }),
+    createContext("src/webview/details/main.tsx", "dist/webview/details.js", {
       format: "iife",
       platform: "browser",
       jsx: "automatic",

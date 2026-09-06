@@ -12,9 +12,16 @@
     "jsxImportSource": "preact",
     /* The split view shares src/split/hunk-model.ts with the extension host, which uses Node's Buffer */
     "types": ["node"],
-    "rootDirs": ["./graph", "./graph/.generated", "./split"],
+    "rootDirs": ["./graph", "./graph/.generated", "./split", "./details"],
     "plugins": [{ "name": "typescript-plugin-css-modules" }]
   },
-  "include": ["graph/**/*", "split/**/*", "../graph-protocol.ts", "../split-protocol.ts"],
+  "include": [
+    "graph/**/*",
+    "split/**/*",
+    "details/**/*",
+    "../graph-protocol.ts",
+    "../split-protocol.ts",
+    "../details-protocol.ts"
+  ],
   "exclude": ["node_modules", "dist"]
 }

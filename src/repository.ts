@@ -7,6 +7,7 @@ import {
   STATUS_TEMPLATE,
   LOG_TEMPLATE,
   buildLogTemplate,
+  buildDetailsTemplate,
   buildOperationTemplate,
   DIFF_STATS_TEMPLATE,
   BOOKMARK_TRACKING_INFO_TEMPLATE,
@@ -27,6 +28,7 @@ import {
   CancelledError,
 } from "./process";
 import { parseFileStatuses, type ParsedFileStatuses, parseUntrackedFileStatuses } from "./parse-file-statuses";
+import { parseGitDiffLineCounts } from "./parse-git-diff";
 import { readSnapshotDir, readSnapshotFile } from "./diff-snapshot";
 import { parseInterdiffSummary } from "./parse-interdiff-summary";
 import { logger } from "./logger";
@@ -58,7 +60,7 @@ import {
 } from "./jj-editor";
 import { TIMEOUTS, type JJVersion, versionAtLeast, JJ_VERSION_WITH_TAG_TRACKING } from "./constants";
 import { withDivergenceHandling } from "./divergence-handling";
-import { joinRepositoryPath, resolveRepositoryPath, toWorkspaceUri } from "./workspace-paths";
+import { joinRepositoryPath, resolveRepositoryPath, repositoryRelativePath, toWorkspaceUri } from "./workspace-paths";
 import type {
   FileStatus,
   FileStatusType,
@@ -67,6 +69,8 @@ import type {
   Change,
   ChangeId,
   ChangeWithDetails,
+  ChangeDetails,
+  ChangedFileDelta,
   LogEntry,
   LogEntryLocalRef,
   LogEntryRemoteRef,
@@ -1003,6 +1007,66 @@ export class JJRepository {
     }
 
     return entries;
+  }
+
+  /**
+   * Fetches everything the Details view shows about the commit with the given full commit id:
+   * metadata (ids, refs, author, committer, description), the overall diff statistics, and
+   * the changed files with their per-file added/removed line counts. The commit id pins the
+   * content, so the data stays valid (and consistent) even while the change is rewritten.
+   */
+  async getChangeDetails(commitId: string, token?: vscode.CancellationToken): Promise<ChangeDetails> {
+    const output = (
+      await this.jjCommandRead(["log", "-r", commitId, "-n", "1", "--no-graph", "-T", buildDetailsTemplate()], {
+        token,
+      })
+    ).toString();
+
+    if (!output.trim()) {
+      throw new Error("No output from jj log. Maybe the revision couldn't be found?");
+    }
+
+    const entry = JSON.parse(output.trim()) as LogEntry & {
+      files_changed: number;
+      total_added: number;
+      total_removed: number;
+    };
+
+    const { fileStatuses } = this.parseFileStatuses(entry.diff_files ?? [], entry.conflicted_files ?? []);
+    const lineCounts = parseGitDiffLineCounts(
+      (await this.jjCommandRead(["diff", "-r", commitId, "--git"], { token })).toString(),
+    );
+
+    const changedFiles: ChangedFileDelta[] = fileStatuses.map((fileStatus) => {
+      const relativePath = toForwardSlashes(repositoryRelativePath(this.repositoryRoot, fileStatus.path));
+      const counts = lineCounts.get(relativePath);
+      return {
+        type: fileStatus.type,
+        path: relativePath,
+        ...(fileStatus.renamedFrom !== undefined ? { renamedFrom: toForwardSlashes(fileStatus.renamedFrom) } : {}),
+        conflict: fileStatus.isConflict ?? fileStatus.type === "X",
+        ...(counts && !counts.binary ? { linesAdded: counts.added, linesRemoved: counts.removed } : {}),
+        ...(counts?.binary ? { binary: true } : {}),
+      };
+    });
+
+    return {
+      changeId: changeIdFromLogEntry(entry, maxChangeIdPrefixLength([entry.change_id_shortest])),
+      commitId: entry.commit_id,
+      commitIdShort: entry.commit_id_short,
+      currentWorkingCopy: entry.current_working_copy,
+      localBookmarks: [...entry.local_bookmarks].sort((a, b) => a.name.localeCompare(b.name)),
+      remoteBookmarks: [...entry.remote_bookmarks].sort((a, b) => a.name.localeCompare(b.name)),
+      localTags: [...entry.local_tags].sort((a, b) => a.name.localeCompare(b.name)),
+      remoteTags: [...entry.remote_tags].sort((a, b) => a.name.localeCompare(b.name)),
+      author: entry.author,
+      committer: entry.committer,
+      description: entry.description,
+      filesChanged: entry.files_changed,
+      linesAdded: entry.total_added,
+      linesRemoved: entry.total_removed,
+      changedFiles,
+    };
   }
 
   async getDiffStats(

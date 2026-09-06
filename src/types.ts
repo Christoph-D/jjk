@@ -71,6 +71,45 @@ export interface ChangeWithDetails extends Change {
   authoredDate: string;
 }
 
+export interface SignatureWithTimestamp {
+  name: string;
+  email: string;
+  timestamp: string;
+}
+
+/**
+ * A changed file of a change, reduced to what the Details view shows: the status (and rename
+ * source) as in the graph view's changed-files list, plus the file's added/removed line
+ * counts. Binary files carry no line counts and are flagged instead.
+ */
+export interface ChangedFileDelta {
+  type: FileStatusType;
+  path: string;
+  renamedFrom?: string;
+  conflict: boolean;
+  linesAdded?: number;
+  linesRemoved?: number;
+  binary?: boolean;
+}
+
+export interface ChangeDetails {
+  changeId: ChangeId;
+  commitId: string;
+  commitIdShort: string;
+  currentWorkingCopy: boolean;
+  localBookmarks: LogEntryLocalRef[];
+  remoteBookmarks: LogEntryRemoteRef[];
+  localTags: LogEntryLocalRef[];
+  remoteTags: LogEntryRemoteRef[];
+  author: SignatureWithTimestamp;
+  committer: SignatureWithTimestamp;
+  description: string;
+  filesChanged: number;
+  linesAdded: number;
+  linesRemoved: number;
+  changedFiles: ChangedFileDelta[];
+}
+
 import type { LogEntryLocalRef, LogEntryRemoteRef } from "./graph-protocol";
 export type { LogEntryLocalRef, LogEntryRemoteRef };
 

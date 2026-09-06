@@ -3,6 +3,7 @@ import { logger } from "./logger";
 import { createThrottledAsyncFn } from "./utils";
 import { OperationLogManager, OperationLogTreeDataProvider } from "./operation-log-tree-view";
 import { JJGraphWebview } from "./graph-webview";
+import { DetailsWebview } from "./details-webview";
 import type { ExtensionState } from "./extension-state";
 import type { ForceRefresh } from "./source-control";
 
@@ -17,6 +18,9 @@ export function initInfrastructure(state: ExtensionState) {
     state.workspaceSCM.jjBinaryNotFound,
   );
   context.subscriptions.push(graphWebview);
+
+  const detailsWebview = new DetailsWebview(context.extensionUri, graphWebview);
+  context.subscriptions.push(detailsWebview);
 
   state.onDidSetSelectedRepository(
     async () => {
@@ -74,12 +78,12 @@ export function initInfrastructure(state: ExtensionState) {
         void operationLogManager.refresh(operationId);
       }
       if (graphWebview.repository && graphWebview.repository.repositoryRoot === repoSCM.repositoryRoot) {
-        void graphWebview.refresh(operationId);
+        void graphWebview.refresh(operationId).then(() => detailsWebview.refresh());
       }
     }),
   );
 
-  state.initialize(graphWebview, operationLogManager);
+  state.initialize(graphWebview, detailsWebview, operationLogManager);
   vscode.commands.executeCommand("setContext", "jj.reposExist", true);
 }
 

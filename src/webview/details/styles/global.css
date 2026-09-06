@@ -1,0 +1,281 @@
+:root {
+  --details-pill-foreground: #ffffff;
+  --details-bookmark-pill-bg: #393a9b;
+  --details-tag-pill-bg: #ac681b;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  background-color: var(--vscode-editor-background);
+}
+
+.detailsRoot {
+  position: relative;
+  min-height: 100vh;
+  user-select: none;
+}
+
+.detailsStateDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 60px 24px 20px;
+  text-align: center;
+}
+
+.detailsStateDisplay .codicon {
+  font-size: 32px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.detailsStateMessage {
+  font-size: 1.1em;
+  color: var(--vscode-descriptionForeground);
+  max-width: 360px;
+}
+
+.detailsContent {
+  padding: 8px 16px 32px;
+}
+
+.detailsHeader {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 4px 0 8px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+.detailsHeaderChangeId {
+  font-family: var(--vscode-editor-font-family, monospace);
+  font-weight: bold;
+}
+
+.detailsHeaderDescription {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--vscode-descriptionForeground);
+}
+
+.detailsFields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detailsFieldRow {
+  display: grid;
+  grid-template-columns: 85px minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: baseline;
+}
+
+.detailsFieldLabel {
+  color: var(--vscode-descriptionForeground);
+}
+
+.detailsFieldValue {
+  min-width: 0;
+  user-select: text;
+}
+
+.detailsId {
+  font-family: var(--vscode-editor-font-family, monospace);
+  cursor: default;
+}
+
+.detailsNoValue {
+  color: var(--vscode-descriptionForeground);
+}
+
+.detailsDescription {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.detailsDescriptionSection {
+  margin-top: 14px;
+  margin-left: 16px;
+  user-select: text;
+}
+
+.detailsPillList {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.detailsPill {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.85em;
+  color: var(--details-pill-foreground);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detailsBookmarkPill {
+  background-color: var(--details-bookmark-pill-bg);
+}
+
+.detailsTagPill {
+  background-color: var(--details-tag-pill-bg);
+}
+
+.detailsPillConflicted::after {
+  content: "??";
+}
+
+.detailsPillUnsynced::after {
+  content: "*";
+}
+
+.detailsAdded {
+  color: var(--vscode-jjDecoration-addedResourceForeground, var(--vscode-gitDecoration-addedResourceForeground));
+}
+
+.detailsRemoved {
+  color: var(--vscode-jjDecoration-deletedResourceForeground, var(--vscode-gitDecoration-deletedResourceForeground));
+}
+
+.detailsChangedFilesSection {
+  margin-top: 14px;
+}
+
+.detailsChangedFilesHeader {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.detailsChangedFiles {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.detailsChangedFile {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 1px 4px;
+  width: fit-content;
+  max-width: 100%;
+  cursor: pointer;
+  font-size: 0.95em;
+}
+
+.detailsChangedFile:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.detailsChangedFile:hover .detailsFilePath {
+  text-decoration: underline;
+}
+
+.detailsFileStatus {
+  display: inline-block;
+  min-width: 1.2em;
+  font-weight: bold;
+  flex: none;
+}
+
+.detailsChangedFile[data-status="a"],
+.detailsChangedFile[data-status="c"] {
+  color: var(--vscode-jjDecoration-addedResourceForeground, var(--vscode-gitDecoration-addedResourceForeground));
+}
+
+.detailsChangedFile[data-status="m"] {
+  color: var(--vscode-jjDecoration-modifiedResourceForeground, var(--vscode-gitDecoration-modifiedResourceForeground));
+}
+
+.detailsChangedFile[data-status="d"] {
+  color: var(--vscode-jjDecoration-deletedResourceForeground, var(--vscode-gitDecoration-deletedResourceForeground));
+}
+
+.detailsChangedFile[data-status="r"] {
+  color: var(--vscode-jjDecoration-renamedResourceForeground, var(--vscode-gitDecoration-renamedResourceForeground));
+}
+
+.detailsChangedFile[data-status="x"],
+.detailsChangedFile[data-conflict] {
+  color: var(
+    --vscode-jjDecoration-conflictingResourceForeground,
+    var(--vscode-gitDecoration-conflictingResourceForeground)
+  );
+}
+
+.detailsFilePath {
+  color: var(--vscode-foreground);
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.detailsFileDetail {
+  color: var(--vscode-descriptionForeground);
+  font-size: 0.9em;
+  white-space: nowrap;
+  flex: none;
+}
+
+.detailsFileDetail.detailsAdded,
+.detailsFileDetail.detailsRemoved {
+  font-weight: 600;
+}
+
+.detailsFileDetail.detailsAdded {
+  color: var(--vscode-jjDecoration-addedResourceForeground, var(--vscode-gitDecoration-addedResourceForeground));
+}
+
+.detailsFileDetail.detailsRemoved {
+  color: var(--vscode-jjDecoration-deletedResourceForeground, var(--vscode-gitDecoration-deletedResourceForeground));
+}
+
+.detailsContextMenu {
+  position: absolute;
+  left: -9999px;
+  top: -9999px;
+  z-index: 1000;
+  min-width: 120px;
+  background-color: var(--vscode-menu-background);
+  border: 1px solid var(--vscode-menu-border);
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 4px 0;
+  user-select: none;
+}
+
+.detailsContextMenuItem {
+  padding: 6px 20px;
+  cursor: pointer;
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-menu-foreground);
+  white-space: nowrap;
+}
+
+.detailsContextMenuItem:hover {
+  background-color: var(--vscode-menu-selectionBackground);
+  color: var(--vscode-menu-selectionForeground);
+}
+
+.detailsContextMenuSeparator {
+  height: 1px;
+  background-color: var(--vscode-menu-separatorBackground);
+  margin: 4px 8px;
+}
