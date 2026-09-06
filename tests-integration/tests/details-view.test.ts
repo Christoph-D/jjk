@@ -163,6 +163,38 @@ test("details view shows the selected change and follows the graph selection", a
       .toBe(commitB.commit_id);
   });
 
+  await test.step("right-clicking never deselects the current text selection", async () => {
+    const textMenu = detailsFrame.locator("#text-context-menu");
+    const description = detailsFrame.locator(".detailsDescriptionSection");
+    const selectionText = () => detailsFrame.evaluate(() => window.getSelection()?.toString() ?? "");
+
+    // Right-clicking inside the selection keeps it and offers to copy it.
+    await description.selectText();
+    await expect.poll(selectionText).toBe("commit B");
+    await description.click({ button: "right" });
+    await expect(textMenu).toBeVisible();
+    await expect(textMenu.locator("[data-action]")).toHaveText(["Copy"]);
+    expect(await selectionText()).toBe("commit B");
+    await textMenu.locator('[data-action="copyText"]').click();
+    await expect(textMenu).not.toBeVisible();
+    await expect
+      .poll(() =>
+        electronApp.evaluate(({ clipboard }: { clipboard: { readText: () => string } }) => clipboard.readText()),
+      )
+      .toBe("commit B");
+
+    // Right-clicking on a selectable region outside the selection keeps it too, without
+    // showing any menu (the browser default would collapse the selection onto the caret).
+    await description.selectText();
+    const authorValue = detailsFrame
+      .locator(".detailsFieldRow")
+      .filter({ hasText: "Author" })
+      .locator(".detailsFieldValue");
+    await authorValue.click({ button: "right" });
+    await expect(textMenu).not.toBeVisible();
+    expect(await selectionText()).toBe("commit B");
+  });
+
   await test.step("clicking a changed file opens its diff", async () => {
     await detailsFrame.locator('[data-role="changed-file"][data-path="b.txt"]').click();
 

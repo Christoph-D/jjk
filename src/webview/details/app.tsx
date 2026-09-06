@@ -68,6 +68,14 @@ export function App() {
     window.addEventListener("message", (event) => {
       applyExtensionMessage(event.data as DetailsExtensionToWebviewMessage);
     });
+    // The mousedown that precedes a right-click would, by browser default, collapse/move
+    // the current text selection. Suppress that default so right-clicking never alters the
+    // selection and the contextmenu handler below can act on what the user selected.
+    const handleMouseDown = (e: MouseEvent) => {
+      if (e.button === 2) {
+        e.preventDefault();
+      }
+    };
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
       closeFileContextMenu();
@@ -81,9 +89,11 @@ export function App() {
         };
       }
     };
+    document.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("contextmenu", handleContextMenu);
     postMessage({ command: "webviewReady" });
     return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("contextmenu", handleContextMenu);
     };
   }, []);
