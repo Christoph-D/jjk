@@ -64,8 +64,10 @@ test("details view shows the selected change and follows the graph selection", a
     await expect(nodes.nth(1)).toHaveAttribute("data-selected");
 
     await expect(detailsFrame.locator(".detailsHeaderChangeId")).toHaveAttribute("title", commitBFullChangeId);
-    const commitId = detailsFrame.locator(".detailsId").filter({ hasText: commitB.commit_id_short });
-    await expect(commitId).toHaveAttribute("title", commitB.commit_id);
+    const changeId = detailsFrame.locator(".detailsId").filter({ hasText: commitBFullChangeId });
+    await expect(changeId).toHaveText(commitBFullChangeId);
+    const commitId = detailsFrame.locator(".detailsId").filter({ hasText: commitB.commit_id });
+    await expect(commitId).toHaveText(commitB.commit_id);
     await expect(detailsFrame.locator(".detailsHeaderDescription")).toHaveText("commit B");
     await expect(detailsFrame.getByText("Test User <test@example.com>").first()).toBeVisible();
 

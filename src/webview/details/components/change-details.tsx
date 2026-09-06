@@ -132,14 +132,10 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
       </div>
       <div class="detailsFields">
         <FieldRow label="Change ID">
-          <span class="detailsId" title={change.changeId.changeId}>
-            {shortChangeId}
-          </span>
+          <span class="detailsId">{change.changeId.changeId}</span>
         </FieldRow>
         <FieldRow label="Commit ID">
-          <span class="detailsId" title={change.commitId}>
-            {change.commitIdShort}
-          </span>
+          <span class="detailsId">{change.commitId}</span>
         </FieldRow>
         <FieldRow label="Bookmarks">
           <RefPills localRefs={change.localBookmarks} remoteRefs={change.remoteBookmarks} kind="bookmark" />

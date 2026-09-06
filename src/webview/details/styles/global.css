@@ -92,6 +92,7 @@ body {
 
 .detailsId {
   font-family: var(--vscode-editor-font-family, monospace);
+  overflow-wrap: anywhere;
   cursor: default;
 }
 
