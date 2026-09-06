@@ -1,6 +1,12 @@
 import { fileContextMenu, formatShortChangeId, postMessage } from "../signals";
 import { RefPill } from "./ref-pill";
-import type { ChangeDetails, ChangedFileDelta, LogEntryLocalRef, LogEntryRemoteRef } from "../../../types";
+import type {
+  ChangeDetails,
+  ChangedFileDelta,
+  LogEntryLocalRef,
+  LogEntryRemoteRef,
+  SignatureWithTimestamp,
+} from "../../../types";
 
 function FieldRow({ label, children }: { label: string; children: preact.ComponentChildren }) {
   return (
@@ -11,9 +17,22 @@ function FieldRow({ label, children }: { label: string; children: preact.Compone
   );
 }
 
-function formatSignature(signature: { name: string; email: string; timestamp: string }): string {
-  const identity = signature.email ? `${signature.name} <${signature.email}>` : signature.name;
-  return signature.timestamp ? `${identity} (${signature.timestamp})` : identity;
+function Signature({ signature }: { signature: SignatureWithTimestamp }) {
+  return (
+    <span>
+      {signature.name}{" "}
+      {signature.email ? (
+        <>
+          {"<"}
+          <a class="detailsEmailLink" href={`mailto:${signature.email}`}>
+            {signature.email}
+          </a>
+          {">"}
+        </>
+      ) : null}
+      {signature.timestamp ? ` (${signature.timestamp})` : ""}
+    </span>
+  );
 }
 
 function RefPills({
@@ -144,10 +163,10 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
           <RefPills localRefs={change.localTags} remoteRefs={change.remoteTags} kind="tag" />
         </FieldRow>
         <FieldRow label="Author">
-          <span>{formatSignature(change.author)}</span>
+          <Signature signature={change.author} />
         </FieldRow>
         <FieldRow label="Committer">
-          <span>{formatSignature(change.committer)}</span>
+          <Signature signature={change.committer} />
         </FieldRow>
       </div>
       <div class="detailsDescriptionSection">

@@ -100,6 +100,10 @@ body {
   color: var(--vscode-descriptionForeground);
 }
 
+.detailsEmailLink {
+  color: var(--vscode-textLink-foreground);
+}
+
 .detailsDescription {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
