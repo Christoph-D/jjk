@@ -35,7 +35,7 @@ function useMenuContext(): MenuContextValue {
 }
 
 interface MenuProps extends Omit<HTMLAttributes<HTMLDivElement>, "class" | "style" | "ref"> {
-  state: { pageX: number; pageY: number };
+  state: { clientX: number; clientY: number };
   children: ComponentChildren;
   [dataAttr: `data-${string}`]: string | undefined;
 }
@@ -63,7 +63,7 @@ export function Menu({ state, children, ...rest }: MenuProps) {
       if (!menuRef.current) {
         return;
       }
-      positionMenu(menuRef.current, state.pageX, state.pageY);
+      positionMenu(menuRef.current, state.clientX, state.clientY);
       setPositions(measureSubmenus(registrations.current));
     });
   }, [state]);
@@ -176,30 +176,33 @@ export function MenuSeparator() {
 }
 
 const ANCHOR_OFFSET = 2;
+const VIEWPORT_MARGIN = 10;
 
-function positionMenu(menu: HTMLElement, pageX: number, pageY: number): void {
+// The menu element is position: fixed, so clientX/clientY (viewport coordinates) map directly
+// onto style.left/style.top: the anchor stays at the click point regardless of scroll position
+// or where in the DOM the menu is rendered.
+function positionMenu(menu: HTMLElement, clientX: number, clientY: number): void {
   const menuRect = menu.getBoundingClientRect();
   const viewportWidth = window.innerWidth;
   const viewportHeight = window.innerHeight;
-  const scrollY = window.scrollY || window.pageYOffset;
 
-  let left = pageX + ANCHOR_OFFSET;
-  let top = pageY + ANCHOR_OFFSET;
+  let left = clientX + ANCHOR_OFFSET;
+  let top = clientY + ANCHOR_OFFSET;
 
-  if (left + menuRect.width > viewportWidth - 10) {
-    left = pageX - ANCHOR_OFFSET - menuRect.width;
+  if (left + menuRect.width > viewportWidth - VIEWPORT_MARGIN) {
+    left = clientX - ANCHOR_OFFSET - menuRect.width;
   }
 
-  if (top + menuRect.height > viewportHeight + scrollY - 10) {
-    top = pageY - ANCHOR_OFFSET - menuRect.height;
+  if (top + menuRect.height > viewportHeight - VIEWPORT_MARGIN) {
+    top = clientY - ANCHOR_OFFSET - menuRect.height;
   }
 
-  if (left < 10) {
-    left = 10;
+  if (left < VIEWPORT_MARGIN) {
+    left = VIEWPORT_MARGIN;
   }
 
-  if (top < scrollY + 10) {
-    top = scrollY + 10;
+  if (top < VIEWPORT_MARGIN) {
+    top = VIEWPORT_MARGIN;
   }
 
   menu.style.left = left + "px";

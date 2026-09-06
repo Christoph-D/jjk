@@ -52,8 +52,8 @@ export const diffStatsPrefetchTimeout = signal<ReturnType<typeof setTimeout> | n
 
 interface ContextMenuState {
   change: RegularChangeNode;
-  pageX: number;
-  pageY: number;
+  clientX: number;
+  clientY: number;
   changeDoubleClickAction: string;
 }
 
@@ -62,8 +62,8 @@ interface RebaseMenuState {
   sourceIds: FullChangeId[];
   targetId: FullChangeId;
   targetChange: RegularChangeNode;
-  pageX: number;
-  pageY: number;
+  clientX: number;
+  clientY: number;
 }
 
 interface TooltipState {
@@ -100,8 +100,8 @@ export interface PendingGraphUpdate {
 interface PillContextMenuState {
   type: "bookmark" | "tag" | "workspace";
   name: string;
-  pageX: number;
-  pageY: number;
+  clientX: number;
+  clientY: number;
   synced?: boolean;
   remotes?: string[];
   unsyncedRemotes?: string[];
@@ -118,8 +118,8 @@ interface RemoteRefContextMenuState {
   name: string;
   remote: string;
   change: RegularChangeNode;
-  pageX: number;
-  pageY: number;
+  clientX: number;
+  clientY: number;
   changeDoubleClickAction: string;
   pendingStatus?: boolean;
   action?: "delete" | "push" | "track";
@@ -132,8 +132,8 @@ export const remoteRefContextMenu = signal<RemoteRefContextMenuState | null>(nul
 interface FileContextMenuState {
   change: RegularChangeNode;
   file: ChangedFile;
-  pageX: number;
-  pageY: number;
+  clientX: number;
+  clientY: number;
 }
 
 export const fileContextMenu = signal<FileContextMenuState | null>(null);

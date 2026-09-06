@@ -144,7 +144,7 @@ function ChangedFileRow({ change, file }: { change: ChangeDetails; file: Changed
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        fileContextMenu.value = { change, file, pageX: e.pageX, pageY: e.pageY };
+        fileContextMenu.value = { change, file, clientX: e.clientX, clientY: e.clientY };
       }}
     >
       <span class="detailsFileStatus">
@@ -187,8 +187,8 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
                 kind: "change",
                 fullId: change.changeId.changeId,
                 shortId: shortChangeId,
-                pageX: e.pageX,
-                pageY: e.pageY,
+                clientX: e.clientX,
+                clientY: e.clientY,
               };
             }}
           >
@@ -206,8 +206,8 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
                 kind: "commit",
                 fullId: change.commitId,
                 shortId: change.commitIdShort,
-                pageX: e.pageX,
-                pageY: e.pageY,
+                clientX: e.clientX,
+                clientY: e.clientY,
               };
             }}
           >

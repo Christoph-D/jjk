@@ -76,8 +76,8 @@ export function App() {
         const selection = window.getSelection();
         textContextMenu.value = {
           text: selection?.toString() ?? "",
-          pageX: e.pageX,
-          pageY: e.pageY,
+          clientX: e.clientX,
+          clientY: e.clientY,
         };
       }
     };

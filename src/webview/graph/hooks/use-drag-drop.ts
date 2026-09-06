@@ -159,8 +159,8 @@ export function useDragDrop(change: ChangeNode) {
         sourceIds,
         targetId,
         targetChange: change,
-        pageX: e.pageX,
-        pageY: e.pageY,
+        clientX: e.clientX,
+        clientY: e.clientY,
       };
 
       setTimeout(() => {

@@ -9,7 +9,11 @@
   user-select: none;
 }
 
+/* The menu itself is viewport-anchored (see positionMenu in menu-container.tsx) so that it
+   opens at the click point regardless of scroll position; submenus stay anchored to their
+   parent item. */
 .contextMenu {
+  position: fixed;
   left: -9999px;
   top: -9999px;
   z-index: 1000;

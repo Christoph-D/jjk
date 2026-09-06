@@ -47,8 +47,8 @@ export function applyExtensionMessage(message: DetailsExtensionToWebviewMessage)
 export interface FileContextMenuState {
   change: ChangeDetails;
   file: ChangedFileDelta;
-  pageX: number;
-  pageY: number;
+  clientX: number;
+  clientY: number;
 }
 
 export const fileContextMenu = signal<FileContextMenuState | null>(null);
@@ -59,8 +59,8 @@ export function closeFileContextMenu(): void {
 
 export interface TextContextMenuState {
   text: string;
-  pageX: number;
-  pageY: number;
+  clientX: number;
+  clientY: number;
 }
 
 export const textContextMenu = signal<TextContextMenuState | null>(null);
@@ -76,8 +76,8 @@ export interface IdContextMenuState {
   fullId: string;
   /** The short ID as shown elsewhere in the extension. */
   shortId: string;
-  pageX: number;
-  pageY: number;
+  clientX: number;
+  clientY: number;
 }
 
 export const idContextMenu = signal<IdContextMenuState | null>(null);

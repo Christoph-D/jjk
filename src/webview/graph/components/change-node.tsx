@@ -108,8 +108,8 @@ export function ChangeNodeRow({ change, index, nodeData, changeIdRef, compact, s
     closeAllMenus();
     contextMenu.value = {
       change,
-      pageX: e.pageX,
-      pageY: e.pageY,
+      clientX: e.clientX,
+      clientY: e.clientY,
       changeDoubleClickAction: changeDoubleClickAction.value,
     };
   };
@@ -285,8 +285,8 @@ const MemoizedChangeNodeTextContent = memo(function ChangeNodeTextContent({
                     pillContextMenu.value = {
                       type: "workspace",
                       name: wc,
-                      pageX: e.pageX,
-                      pageY: e.pageY,
+                      clientX: e.clientX,
+                      clientY: e.clientY,
                     };
                   }
             }
@@ -311,8 +311,8 @@ const MemoizedChangeNodeTextContent = memo(function ChangeNodeTextContent({
                 pillContextMenu.value = {
                   type: "bookmark",
                   name: b.name,
-                  pageX: e.pageX,
-                  pageY: e.pageY,
+                  clientX: e.clientX,
+                  clientY: e.clientY,
                   cancelPush: true,
                 };
                 return;
@@ -320,8 +320,8 @@ const MemoizedChangeNodeTextContent = memo(function ChangeNodeTextContent({
               pillContextMenu.value = {
                 type: "bookmark",
                 name: b.name,
-                pageX: e.pageX,
-                pageY: e.pageY,
+                clientX: e.clientX,
+                clientY: e.clientY,
                 synced: b.synced,
                 pendingRemotes: true,
               };
@@ -391,8 +391,8 @@ const MemoizedChangeNodeTextContent = memo(function ChangeNodeTextContent({
                           name: b.name,
                           remote: b.remote,
                           change,
-                          pageX: e.pageX,
-                          pageY: e.pageY,
+                          clientX: e.clientX,
+                          clientY: e.clientY,
                           changeDoubleClickAction: changeDoubleClickAction.value,
                           cancelDelete: true,
                         };
@@ -403,8 +403,8 @@ const MemoizedChangeNodeTextContent = memo(function ChangeNodeTextContent({
                         name: b.name,
                         remote: b.remote,
                         change,
-                        pageX: e.pageX,
-                        pageY: e.pageY,
+                        clientX: e.clientX,
+                        clientY: e.clientY,
                         changeDoubleClickAction: changeDoubleClickAction.value,
                         pendingStatus: true,
                       };
@@ -437,8 +437,8 @@ const MemoizedChangeNodeTextContent = memo(function ChangeNodeTextContent({
                 pillContextMenu.value = {
                   type: "tag",
                   name: t.name,
-                  pageX: e.pageX,
-                  pageY: e.pageY,
+                  clientX: e.clientX,
+                  clientY: e.clientY,
                   cancelPush: true,
                 };
                 return;
@@ -446,8 +446,8 @@ const MemoizedChangeNodeTextContent = memo(function ChangeNodeTextContent({
               pillContextMenu.value = {
                 type: "tag",
                 name: t.name,
-                pageX: e.pageX,
-                pageY: e.pageY,
+                clientX: e.clientX,
+                clientY: e.clientY,
                 pendingRemotes: true,
               };
               postMessage({
@@ -496,8 +496,8 @@ const MemoizedChangeNodeTextContent = memo(function ChangeNodeTextContent({
                           name: t.name,
                           remote: t.remote,
                           change,
-                          pageX: e.pageX,
-                          pageY: e.pageY,
+                          clientX: e.clientX,
+                          clientY: e.clientY,
                           changeDoubleClickAction: changeDoubleClickAction.value,
                           cancelDelete: true,
                         };
@@ -508,8 +508,8 @@ const MemoizedChangeNodeTextContent = memo(function ChangeNodeTextContent({
                         name: t.name,
                         remote: t.remote,
                         change,
-                        pageX: e.pageX,
-                        pageY: e.pageY,
+                        clientX: e.clientX,
+                        clientY: e.clientY,
                         changeDoubleClickAction: changeDoubleClickAction.value,
                         pendingStatus: true,
                       };
@@ -568,8 +568,8 @@ const ChangedFileList = memo(function ChangedFileList({ change }: { change: Regu
             fileContextMenu.value = {
               change,
               file: f,
-              pageX: e.pageX,
-              pageY: e.pageY,
+              clientX: e.clientX,
+              clientY: e.clientY,
             };
           }}
         >

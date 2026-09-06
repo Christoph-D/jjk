@@ -20,7 +20,7 @@ export function IdContextMenu() {
         if (!ref.current) {
           return;
         }
-        positionMenu(ref.current, state.pageX, state.pageY);
+        positionMenu(ref.current, state.clientX, state.clientY);
         ref.current.style.visibility = "";
       });
     }
