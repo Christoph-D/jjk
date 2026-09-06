@@ -177,25 +177,6 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
         </span>
       </div>
       <div class="detailsFields">
-        <FieldRow label="Change ID">
-          <span
-            class="detailsId"
-            onContextMenu={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              idContextMenu.value = {
-                kind: "change",
-                fullId: change.changeId.changeId,
-                shortId: shortChangeId,
-                clientX: e.clientX,
-                clientY: e.clientY,
-              };
-            }}
-          >
-            {formatFullChangeId(change.changeId)}
-          </span>
-          <CopyIdButton label="Change ID" value={change.changeId.changeId} />
-        </FieldRow>
         <FieldRow label="Commit ID">
           <span
             class="detailsId"
@@ -214,6 +195,25 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
             {change.commitId}
           </span>
           <CopyIdButton label="Commit ID" value={change.commitId} />
+        </FieldRow>
+        <FieldRow label="Change ID">
+          <span
+            class="detailsId"
+            onContextMenu={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              idContextMenu.value = {
+                kind: "change",
+                fullId: change.changeId.changeId,
+                shortId: shortChangeId,
+                clientX: e.clientX,
+                clientY: e.clientY,
+              };
+            }}
+          >
+            {formatFullChangeId(change.changeId)}
+          </span>
+          <CopyIdButton label="Change ID" value={change.changeId.changeId} />
         </FieldRow>
         <FieldRow label="Bookmarks">
           <RefPills localRefs={change.localBookmarks} remoteRefs={change.remoteBookmarks} kind="bookmark" />
