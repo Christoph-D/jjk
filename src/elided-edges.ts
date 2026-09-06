@@ -515,7 +515,6 @@ function createSyntheticEntry(node: SyntheticNode): LogEntry {
 
   return {
     change_id: node.id,
-    change_id_short: "",
     change_id_shortest: "",
     commit_id: "",
     commit_id_short: "",

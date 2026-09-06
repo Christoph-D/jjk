@@ -8,7 +8,6 @@ import type { LogEntry, ParentRef } from "../types";
 function createEntry(changeId: string, parents: ParentRef[] = [], extra: Partial<LogEntry> = {}): LogEntry {
   return {
     change_id: changeId,
-    change_id_short: changeId.slice(0, 4),
     change_id_shortest: changeId.slice(0, 4),
     commit_id: changeId,
     commit_id_short: changeId.slice(0, 8),
