@@ -26,6 +26,7 @@ test("details view shows the selected change and follows the graph selection", a
   graphFrame,
   testRepo,
   workbox,
+  electronApp,
 }) => {
   await testRepo.commitFile("a.txt", "content a", "commit A");
   await testRepo.commitFile("b.txt", "content b", "commit B");
@@ -75,6 +76,32 @@ test("details view shows the selected change and follows the graph selection", a
     await expect(changedFile).toBeVisible();
     await expect(changedFile.locator(".detailsAdded")).toHaveText("+1");
     await expect(changedFile.locator(".detailsRemoved")).toHaveCount(0);
+  });
+
+  await test.step("copy buttons copy the full change and commit IDs", async () => {
+    const changeIdCopy = detailsFrame
+      .locator(".detailsFieldRow")
+      .filter({ hasText: "Change ID" })
+      .locator('[data-role="copy-id"]');
+    const commitIdCopy = detailsFrame
+      .locator(".detailsFieldRow")
+      .filter({ hasText: "Commit ID" })
+      .locator('[data-role="copy-id"]');
+
+    await changeIdCopy.click();
+    await expect(changeIdCopy.locator(".codicon")).toHaveClass(/codicon-check/);
+    await expect
+      .poll(() =>
+        electronApp.evaluate(({ clipboard }: { clipboard: { readText: () => string } }) => clipboard.readText()),
+      )
+      .toBe(commitBFullChangeId);
+
+    await commitIdCopy.click();
+    await expect
+      .poll(() =>
+        electronApp.evaluate(({ clipboard }: { clipboard: { readText: () => string } }) => clipboard.readText()),
+      )
+      .toBe(commitB.commit_id);
   });
 
   await test.step("clicking a changed file opens its diff", async () => {

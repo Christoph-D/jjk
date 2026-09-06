@@ -24,6 +24,7 @@ export type DetailsWebviewToExtensionMessage =
   | { command: "openFileInWorkingCopy"; path: string }
   | { command: "copyPath"; path: string }
   | { command: "copyRelativePath"; path: string }
+  | { command: "copyId"; id: string }
   | { command: "reportError"; message: string; stack?: string }
   | { command: "showWarning"; message: string };
 

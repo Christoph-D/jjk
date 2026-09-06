@@ -96,6 +96,33 @@ body {
   cursor: default;
 }
 
+.detailsCopyIdButton {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  padding: 0 1px;
+  border: none;
+  background: transparent;
+  color: var(--vscode-descriptionForeground);
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+}
+
+.detailsCopyIdButton .codicon {
+  font-size: var(--vscode-font-size);
+}
+
+.detailsCopyIdButton:hover,
+.detailsCopyIdButton:focus-visible {
+  color: var(--vscode-foreground);
+}
+
+.detailsCopyIdButton:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  border-radius: 2px;
+}
+
 .detailsNoValue {
   color: var(--vscode-descriptionForeground);
 }

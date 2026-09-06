@@ -220,6 +220,9 @@ export class DetailsWebview implements vscode.Disposable {
         await vscode.env.clipboard.writeText(repositoryRelativePath(repo.repositoryRoot, absPath));
         break;
       }
+      case "copyId":
+        await vscode.env.clipboard.writeText(message.id);
+        break;
       case "reportError":
         logger.error(`Webview error: ${message.message}${message.stack ? `\n${message.stack}` : ""}`);
         break;

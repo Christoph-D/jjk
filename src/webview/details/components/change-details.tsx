@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "preact/hooks";
 import { fileContextMenu, formatShortChangeId, postMessage } from "../signals";
 import { RefPill } from "./ref-pill";
 import type {
@@ -7,6 +8,32 @@ import type {
   LogEntryRemoteRef,
   SignatureWithTimestamp,
 } from "../../../types";
+
+const COPY_FEEDBACK_MS = 1500;
+
+function CopyIdButton({ label, value }: { label: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  return (
+    <button
+      type="button"
+      class="detailsCopyIdButton"
+      title={copied ? "Copied!" : `Copy ${label}`}
+      data-role="copy-id"
+      onClick={() => {
+        postMessage({ command: "copyId", id: value });
+        setCopied(true);
+        clearTimeout(timer.current);
+        timer.current = setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
+      }}
+    >
+      <span class={`codicon codicon-${copied ? "check" : "copy"}`} aria-hidden="true" />
+    </button>
+  );
+}
 
 function FieldRow({ label, children }: { label: string; children: preact.ComponentChildren }) {
   return (
@@ -152,9 +179,11 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
       <div class="detailsFields">
         <FieldRow label="Change ID">
           <span class="detailsId">{change.changeId.changeId}</span>
+          <CopyIdButton label="Change ID" value={change.changeId.changeId} />
         </FieldRow>
         <FieldRow label="Commit ID">
           <span class="detailsId">{change.commitId}</span>
+          <CopyIdButton label="Commit ID" value={change.commitId} />
         </FieldRow>
         <FieldRow label="Bookmarks">
           <RefPills localRefs={change.localBookmarks} remoteRefs={change.remoteBookmarks} kind="bookmark" />
