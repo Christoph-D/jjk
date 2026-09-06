@@ -57,6 +57,18 @@ export function closeFileContextMenu(): void {
   fileContextMenu.value = null;
 }
 
+export interface TextContextMenuState {
+  text: string;
+  pageX: number;
+  pageY: number;
+}
+
+export const textContextMenu = signal<TextContextMenuState | null>(null);
+
+export function closeTextContextMenu(): void {
+  textContextMenu.value = null;
+}
+
 /** The short change ID as the graph view shows it (prefix plus alignment suffix and offset). */
 export function formatShortChangeId(changeId: ChangeId): string {
   const short = changeId.changeIdPrefix + changeId.changeIdSuffix;

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "preact/hooks";
 import { closeFileContextMenu, fileContextMenu, formatShortChangeId, postMessage } from "../signals";
+import { positionMenu } from "./position-menu";
 
 // Mirrors the graph view's changed-file context menu (which in turn mirrors the
 // scm/resourceState/context menu contributions): the working-copy change shows "Open File"
@@ -124,35 +125,4 @@ export function FileContextMenu() {
       </div>
     </div>
   );
-}
-
-const ANCHOR_OFFSET = 2;
-
-function positionMenu(menu: HTMLElement, pageX: number, pageY: number): void {
-  const menuRect = menu.getBoundingClientRect();
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const scrollY = window.scrollY || window.pageYOffset;
-
-  let left = pageX + ANCHOR_OFFSET;
-  let top = pageY + ANCHOR_OFFSET;
-
-  if (left + menuRect.width > viewportWidth - 10) {
-    left = pageX - ANCHOR_OFFSET - menuRect.width;
-  }
-
-  if (top + menuRect.height > viewportHeight + scrollY - 10) {
-    top = pageY - ANCHOR_OFFSET - menuRect.height;
-  }
-
-  if (left < 10) {
-    left = 10;
-  }
-
-  if (top < scrollY + 10) {
-    top = scrollY + 10;
-  }
-
-  menu.style.left = left + "px";
-  menu.style.top = top + "px";
 }
