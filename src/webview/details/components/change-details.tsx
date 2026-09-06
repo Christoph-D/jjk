@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { fileContextMenu, formatShortChangeId, postMessage } from "../signals";
+import { fileContextMenu, formatFullChangeId, formatShortChangeId, postMessage } from "../signals";
 import { RefPill } from "./ref-pill";
 import type {
   ChangeDetails,
@@ -178,7 +178,7 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
       </div>
       <div class="detailsFields">
         <FieldRow label="Change ID">
-          <span class="detailsId">{change.changeId.changeId}</span>
+          <span class="detailsId">{formatFullChangeId(change.changeId)}</span>
           <CopyIdButton label="Change ID" value={change.changeId.changeId} />
         </FieldRow>
         <FieldRow label="Commit ID">

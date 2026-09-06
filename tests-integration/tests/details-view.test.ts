@@ -65,8 +65,10 @@ test("details view shows the selected change and follows the graph selection", a
     await expect(nodes.nth(1)).toHaveAttribute("data-selected");
 
     await expect(detailsFrame.locator(".detailsHeaderChangeId")).toHaveAttribute("title", commitBFullChangeId);
-    const changeId = detailsFrame.locator(".detailsId").filter({ hasText: commitBFullChangeId });
-    await expect(changeId).toHaveText(commitBFullChangeId);
+    // The Change ID row omits the offset suffix for this non-divergent change, even though jj
+    // reports one, while the header title and the copy button keep the full ID jj expects.
+    const changeId = detailsFrame.locator(".detailsId").filter({ hasText: commitB.change_id });
+    await expect(changeId).toHaveText(commitB.change_id);
     const commitId = detailsFrame.locator(".detailsId").filter({ hasText: commitB.commit_id });
     await expect(commitId).toHaveText(commitB.commit_id);
     await expect(detailsFrame.locator(".detailsHeaderDescription")).toHaveText("commit B");
@@ -153,5 +155,33 @@ test("details view shows the selected change and follows the graph selection", a
     const changedFileA = detailsFrame.locator('[data-role="changed-file"][data-path="a.txt"]');
     await expect(changedFileA).toBeVisible();
     await expect(changedFileA.locator(".detailsAdded")).toHaveText("+1");
+  });
+
+  await test.step("change ID row keeps the offset only for divergent changes", async () => {
+    // Build on commit B's pre-commit version (at offset 1), resurrecting it and making the change
+    // divergent: two visible commits now share the change ID.
+    await testRepo.jjCommand(["new", `${commitB.change_id}/1`]);
+    await expect(nodes).toHaveCount(5);
+
+    const divergentSibling = graphFrame.locator(`#nodes > [data-change-id="${commitB.change_id}/1"]`);
+    await divergentSibling.click();
+    await expect(divergentSibling).toHaveAttribute("data-selected");
+
+    const changeIdRow = detailsFrame.locator(".detailsId").filter({ hasText: commitB.change_id });
+    await expect(changeIdRow).toHaveText(`${commitB.change_id}/1`);
+
+    // Once the divergent sibling is abandoned, the change is no longer divergent, but jj keeps
+    // reporting a change offset (e.g. "0") that must not leak into the Change ID row.
+    await testRepo.jjCommand(["abandon", `${commitB.change_id}/1`]);
+    await expect(nodes).toHaveCount(4);
+
+    const commitBAfter = (await testRepo.log()).find((e) => e.change_id === commitB.change_id)!;
+    expect(commitBAfter.divergent).toBe(false);
+    expect(commitBAfter.change_offset).toBeTruthy();
+
+    const commitBNode = graphFrame.locator(`#nodes > [data-change-id^="${commitB.change_id}"]`);
+    await commitBNode.click();
+    await expect(commitBNode).toHaveAttribute("data-selected");
+    await expect(changeIdRow).toHaveText(commitB.change_id);
   });
 });

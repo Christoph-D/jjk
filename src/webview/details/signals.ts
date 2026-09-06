@@ -62,3 +62,13 @@ export function formatShortChangeId(changeId: ChangeId): string {
   const short = changeId.changeIdPrefix + changeId.changeIdSuffix;
   return changeId.changeOffset ? `${short}/${changeId.changeOffset}` : short;
 }
+
+/**
+ * The full change ID as the graph view shows it. The stored full ID embeds the `/offset` suffix
+ * whenever jj reports one — even when it is not needed to disambiguate a non-divergent change —
+ * so drop it unless `changeOffset` marks the change as divergent. The stored full ID itself
+ * (with the offset) is still the form jj commands expect.
+ */
+export function formatFullChangeId(changeId: ChangeId): string {
+  return changeId.changeOffset ? changeId.changeId : changeId.changeId.split("/")[0];
+}
