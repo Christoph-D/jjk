@@ -1,14 +1,23 @@
 import { useEffect } from "preact/hooks";
-import { applyExtensionMessage, closeFileContextMenu, detailsState, postMessage, textContextMenu } from "./signals";
+import {
+  applyExtensionMessage,
+  closeFileContextMenu,
+  closeIdContextMenu,
+  detailsState,
+  postMessage,
+  textContextMenu,
+} from "./signals";
 import { ChangeDetailsView } from "./components/change-details";
 import { FileContextMenu } from "./components/file-context-menu";
+import { IdContextMenu } from "./components/id-context-menu";
 import { TextContextMenu } from "./components/text-context-menu";
 import type { DetailsExtensionToWebviewMessage } from "../../details-protocol";
 
 // The default (Electron) Cut/Copy/Paste menu is replaced by custom menus: right-clicking
 // inside an active text selection shows the text context menu (whose only entry copies
-// the selection), and every other right-click shows nothing. Custom menus (e.g. the file
-// context menu) already call preventDefault()/stopPropagation() on their rows, so those
+// the selection), right-clicking a Change ID / Commit ID value shows the ID context menu,
+// and every other right-click shows nothing. Custom menus (e.g. the file context menu)
+// already call preventDefault()/stopPropagation() on their rows, so those
 // events never reach this document-level handler.
 function isContextMenuWithinSelection(e: MouseEvent): boolean {
   const selection = window.getSelection();
@@ -62,6 +71,7 @@ export function App() {
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
       closeFileContextMenu();
+      closeIdContextMenu();
       if (isContextMenuWithinSelection(e)) {
         const selection = window.getSelection();
         textContextMenu.value = {
@@ -92,6 +102,7 @@ export function App() {
       {state.kind === "error" && <StateMessage icon="error" message="Failed to load change details." />}
       {state.kind === "single" && <ChangeDetailsView change={state.change} />}
       <FileContextMenu />
+      <IdContextMenu />
       <TextContextMenu />
     </div>
   );

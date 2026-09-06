@@ -106,6 +106,61 @@ test("details view shows the selected change and follows the graph selection", a
       .toBe(commitB.commit_id);
   });
 
+  await test.step("right-clicking an ID value offers Copy and Copy Short ID", async () => {
+    const menu = detailsFrame.locator("#id-context-menu");
+
+    // The Change ID menu copies the full ID (with offset, like the copy button) and the
+    // short change ID shown in the details header.
+    const changeIdValue = detailsFrame
+      .locator(".detailsFieldRow")
+      .filter({ hasText: "Change ID" })
+      .locator(".detailsId");
+    await changeIdValue.click({ button: "right" });
+    await expect(menu).toBeVisible();
+    await expect(menu.locator("[data-action]")).toHaveText(["Copy", "Copy Short Change ID"]);
+    const expectedShortChangeId = await detailsFrame.locator(".detailsHeaderChangeId").textContent();
+    await menu.locator('[data-action="copyShortId"]').click();
+    await expect(menu).not.toBeVisible();
+    await expect
+      .poll(() =>
+        electronApp.evaluate(({ clipboard }: { clipboard: { readText: () => string } }) => clipboard.readText()),
+      )
+      .toBe(expectedShortChangeId);
+
+    await changeIdValue.click({ button: "right" });
+    await menu.locator('[data-action="copyId"]').click();
+    await expect
+      .poll(() =>
+        electronApp.evaluate(({ clipboard }: { clipboard: { readText: () => string } }) => clipboard.readText()),
+      )
+      .toBe(commitBFullChangeId);
+
+    // The Commit ID menu copies the full ID and the shortest unique ID (minimum 7 chars).
+    const commitIdValue = detailsFrame
+      .locator(".detailsFieldRow")
+      .filter({ hasText: "Commit ID" })
+      .locator(".detailsId");
+    await commitIdValue.click({ button: "right" });
+    await expect(menu).toBeVisible();
+    await expect(menu.locator("[data-action]")).toHaveText(["Copy", "Copy Short Commit ID"]);
+    await menu.locator('[data-action="copyShortId"]').click();
+    await expect
+      .poll(() =>
+        electronApp.evaluate(({ clipboard }: { clipboard: { readText: () => string } }) => clipboard.readText()),
+      )
+      .toBe(commitB.commit_id_short);
+    expect(commitB.commit_id_short.length).toBeGreaterThanOrEqual(7);
+    expect(commitB.commit_id.startsWith(commitB.commit_id_short)).toBe(true);
+
+    await commitIdValue.click({ button: "right" });
+    await menu.locator('[data-action="copyId"]').click();
+    await expect
+      .poll(() =>
+        electronApp.evaluate(({ clipboard }: { clipboard: { readText: () => string } }) => clipboard.readText()),
+      )
+      .toBe(commitB.commit_id);
+  });
+
   await test.step("clicking a changed file opens its diff", async () => {
     await detailsFrame.locator('[data-role="changed-file"][data-path="b.txt"]').click();
 

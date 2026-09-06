@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "preact/hooks";
-import { fileContextMenu, formatFullChangeId, formatShortChangeId, postMessage } from "../signals";
+import { fileContextMenu, formatFullChangeId, formatShortChangeId, idContextMenu, postMessage } from "../signals";
 import { RefPill } from "./ref-pill";
 import type {
   ChangeDetails,
@@ -178,11 +178,41 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
       </div>
       <div class="detailsFields">
         <FieldRow label="Change ID">
-          <span class="detailsId">{formatFullChangeId(change.changeId)}</span>
+          <span
+            class="detailsId"
+            onContextMenu={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              idContextMenu.value = {
+                kind: "change",
+                fullId: change.changeId.changeId,
+                shortId: shortChangeId,
+                pageX: e.pageX,
+                pageY: e.pageY,
+              };
+            }}
+          >
+            {formatFullChangeId(change.changeId)}
+          </span>
           <CopyIdButton label="Change ID" value={change.changeId.changeId} />
         </FieldRow>
         <FieldRow label="Commit ID">
-          <span class="detailsId">{change.commitId}</span>
+          <span
+            class="detailsId"
+            onContextMenu={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              idContextMenu.value = {
+                kind: "commit",
+                fullId: change.commitId,
+                shortId: change.commitIdShort,
+                pageX: e.pageX,
+                pageY: e.pageY,
+              };
+            }}
+          >
+            {change.commitId}
+          </span>
           <CopyIdButton label="Commit ID" value={change.commitId} />
         </FieldRow>
         <FieldRow label="Bookmarks">

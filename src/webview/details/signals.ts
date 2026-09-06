@@ -69,6 +69,23 @@ export function closeTextContextMenu(): void {
   textContextMenu.value = null;
 }
 
+/** The context menu opened by right-clicking a Change ID or Commit ID value. */
+export interface IdContextMenuState {
+  kind: "change" | "commit";
+  /** The full ID as jj commands expect it (with the `/offset` suffix for change IDs). */
+  fullId: string;
+  /** The short ID as shown elsewhere in the extension. */
+  shortId: string;
+  pageX: number;
+  pageY: number;
+}
+
+export const idContextMenu = signal<IdContextMenuState | null>(null);
+
+export function closeIdContextMenu(): void {
+  idContextMenu.value = null;
+}
+
 /** The short change ID as the graph view shows it (prefix plus alignment suffix and offset). */
 export function formatShortChangeId(changeId: ChangeId): string {
   const short = changeId.changeIdPrefix + changeId.changeIdSuffix;
