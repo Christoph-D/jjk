@@ -3,8 +3,8 @@ import { closeIdContextMenu, idContextMenu, postMessage } from "../signals";
 import { positionMenu } from "./position-menu";
 
 // The context menu for the Change ID / Commit ID values: right-clicking an unselected ID
-// offers copying it in full (the form jj commands expect) and in the short form used
-// elsewhere in the extension.
+// offers copying it in full (omitting an unneeded change-ID offset, like the ID rows) and
+// in the short form used elsewhere in the extension.
 export function IdContextMenu() {
   const state = idContextMenu.value;
   const ref = useRef<HTMLDivElement>(null);

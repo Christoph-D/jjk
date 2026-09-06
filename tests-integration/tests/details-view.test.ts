@@ -66,7 +66,7 @@ test("details view shows the selected change and follows the graph selection", a
 
     await expect(detailsFrame.locator(".detailsHeaderChangeId")).toHaveAttribute("title", commitBFullChangeId);
     // The Change ID row omits the offset suffix for this non-divergent change, even though jj
-    // reports one, while the header title and the copy button keep the full ID jj expects.
+    // reports one; only the header title keeps the full ID jj expects.
     const changeId = detailsFrame.locator(".detailsId").filter({ hasText: commitB.change_id });
     await expect(changeId).toHaveText(commitB.change_id);
     const commitId = detailsFrame.locator(".detailsId").filter({ hasText: commitB.commit_id });
@@ -92,11 +92,13 @@ test("details view shows the selected change and follows the graph selection", a
 
     await changeIdCopy.click();
     await expect(changeIdCopy.locator(".codicon")).toHaveClass(/codicon-check/);
+    // The copied full change ID omits the offset jj still reports for this non-divergent
+    // change, matching the ID shown in the row.
     await expect
       .poll(() =>
         electronApp.evaluate(({ clipboard }: { clipboard: { readText: () => string } }) => clipboard.readText()),
       )
-      .toBe(commitBFullChangeId);
+      .toBe(commitB.change_id);
 
     await commitIdCopy.click();
     await expect
@@ -109,8 +111,8 @@ test("details view shows the selected change and follows the graph selection", a
   await test.step("right-clicking an ID value offers Copy and Copy Short ID", async () => {
     const menu = detailsFrame.locator("#id-context-menu");
 
-    // The Change ID menu copies the full ID (with offset, like the copy button) and the
-    // short change ID shown in the details header.
+    // The Change ID menu copies the full ID (without the unneeded offset, like the copy
+    // button) and the short change ID shown in the details header.
     const changeIdValue = detailsFrame
       .locator(".detailsFieldRow")
       .filter({ hasText: "Change ID" })
@@ -133,7 +135,7 @@ test("details view shows the selected change and follows the graph selection", a
       .poll(() =>
         electronApp.evaluate(({ clipboard }: { clipboard: { readText: () => string } }) => clipboard.readText()),
       )
-      .toBe(commitBFullChangeId);
+      .toBe(commitB.change_id);
 
     // The Commit ID menu copies the full ID and the shortest unique ID (minimum 7 chars).
     const commitIdValue = detailsFrame
@@ -225,6 +227,22 @@ test("details view shows the selected change and follows the graph selection", a
     const changeIdRow = detailsFrame.locator(".detailsId").filter({ hasText: commitB.change_id });
     await expect(changeIdRow).toHaveText(`${commitB.change_id}/1`);
 
+    // The diff opened by the context-menu step replaced the Details tab in the editor group;
+    // bring it back so the copy button is clickable.
+    await workbox.getByRole("tab", { name: "JJ Commit Details", exact: true }).click();
+
+    // Copying keeps the offset because it is needed to disambiguate the divergent change.
+    const changeIdCopy = detailsFrame
+      .locator(".detailsFieldRow")
+      .filter({ hasText: "Change ID" })
+      .locator('[data-role="copy-id"]');
+    await changeIdCopy.click();
+    await expect
+      .poll(() =>
+        electronApp.evaluate(({ clipboard }: { clipboard: { readText: () => string } }) => clipboard.readText()),
+      )
+      .toBe(`${commitB.change_id}/1`);
+
     // Once the divergent sibling is abandoned, the change is no longer divergent, but jj keeps
     // reporting a change offset (e.g. "0") that must not leak into the Change ID row.
     await testRepo.jjCommand(["abandon", `${commitB.change_id}/1`]);
@@ -238,5 +256,13 @@ test("details view shows the selected change and follows the graph selection", a
     await commitBNode.click();
     await expect(commitBNode).toHaveAttribute("data-selected");
     await expect(changeIdRow).toHaveText(commitB.change_id);
+
+    // The offset jj keeps reporting must not leak into the copied full change ID either.
+    await changeIdCopy.click();
+    await expect
+      .poll(() =>
+        electronApp.evaluate(({ clipboard }: { clipboard: { readText: () => string } }) => clipboard.readText()),
+      )
+      .toBe(commitB.change_id);
   });
 });

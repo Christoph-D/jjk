@@ -204,7 +204,7 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
               e.stopPropagation();
               idContextMenu.value = {
                 kind: "change",
-                fullId: change.changeId.changeId,
+                fullId: formatFullChangeId(change.changeId),
                 shortId: shortChangeId,
                 clientX: e.clientX,
                 clientY: e.clientY,
@@ -213,7 +213,7 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
           >
             {formatFullChangeId(change.changeId)}
           </span>
-          <CopyIdButton label="Change ID" value={change.changeId.changeId} />
+          <CopyIdButton label="Change ID" value={formatFullChangeId(change.changeId)} />
         </FieldRow>
         <FieldRow label="Bookmarks">
           <RefPills localRefs={change.localBookmarks} remoteRefs={change.remoteBookmarks} kind="bookmark" />

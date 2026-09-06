@@ -72,7 +72,7 @@ export function closeTextContextMenu(): void {
 /** The context menu opened by right-clicking a Change ID or Commit ID value. */
 export interface IdContextMenuState {
   kind: "change" | "commit";
-  /** The full ID as jj commands expect it (with the `/offset` suffix for change IDs). */
+  /** The full ID as shown in the view (with the `/offset` suffix only for divergent changes). */
   fullId: string;
   /** The short ID as shown elsewhere in the extension. */
   shortId: string;
