@@ -1083,6 +1083,53 @@ test("file mode changes split between the resulting commits", async ({ graphFram
     expect(gitDiffs).toContain("new mode 100755");
     expect(await fileContent(testRepo, allSelected, "g.sh")).toBe("one\ntwo\nthree\n");
   });
+
+  await test.step("a content-only edit of an executable file keeps the executable bit", async () => {
+    // f.sh is executable since the first step; edit only its content, then split the whole
+    // change.
+    await testRepo.writeFile("f.sh", "one\ntwo\nthree\n");
+    await testRepo.commit("Split me");
+
+    await expect(nodes).toHaveCount(10);
+
+    const splitFrame = await openSplitView(workbox, graphFrame, nodes.nth(1));
+    await expect(splitFrame.locator(".splitFile")).toHaveCount(1);
+
+    // The mode is unchanged, so the file offers a content hunk but no mode entry; everything
+    // stays selected.
+    const fRow = splitFileRow(splitFrame, "f.sh");
+    await expandSplitFile(fRow);
+    await expect(fRow.locator(".splitRename")).toHaveCount(0);
+    await expect(fRow.locator(".splitHunk")).toHaveCount(1);
+
+    await splitFrame.locator(".splitPrimaryButton").click();
+
+    await handleEditor(workbox, "", "Content only");
+    await handleEditor(workbox, "", "Content rest");
+
+    await expect(nodes).toHaveCount(11);
+
+    await expect(async () => {
+      const logEntries = await testRepo.log();
+      expect(getParents(logEntries, "Content only")).toEqual(["All remaining"]);
+      expect(getParents(logEntries, "Content rest")).toEqual(["Content only"]);
+      expect(getParents(logEntries, "@")).toEqual(["Content rest"]);
+    }).toPass();
+
+    const contentOnly = await changeIdFor(testRepo, "Content only");
+    const contentRest = await changeIdFor(testRepo, "Content rest");
+
+    // The first commit carries only the content edit: no mode lines in its git diff.
+    expect(await diffSummary(testRepo, contentOnly)).toBe("M f.sh");
+    const contentDiff = await gitDiff(testRepo, contentOnly);
+    expect(contentDiff).not.toContain("old mode");
+    expect(contentDiff).not.toContain("new mode");
+    expect(contentDiff).toContain("+three");
+    expect(await fileContent(testRepo, contentOnly, "f.sh")).toBe("one\ntwo\nthree\n");
+
+    // The second commit is empty and the working copy keeps the file executable.
+    expect(await diffSummary(testRepo, contentRest)).toBe("");
+  });
 });
 
 test("file type changes to and from symlinks split between the resulting commits", async ({

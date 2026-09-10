@@ -932,6 +932,8 @@ export class JJRepository {
           path.isAbsolute(filePath) ? path.relative(this.repositoryRoot, filePath) : filePath,
         );
         const target = path.join(rightFolderAbsolutePath, relativePath);
+        const stats = await fs.lstat(target).catch(() => undefined);
+        const existingMode = stats?.isFile() ? stats.mode & 0o777 : undefined;
         // jj creates the diff-edit files read-only, so replace them instead of truncating.
         await fs.rm(target, { force: true });
         if (content === undefined) {
@@ -947,9 +949,13 @@ export class JJRepository {
         }
         await fs.writeFile(target, content);
         // A selected mode change (or the restored old mode of a deselected one) is applied on
-        // top; the permission bits carry it, the git-style type bits do not survive a chmod.
+        // top.
+        // Without one, the replaced file keeps its previous permission bits, which writeFile's
+        // default mode would have dropped.
         if (mode !== undefined) {
           await fs.chmod(target, parseInt(mode, 8) & 0o777);
+        } else if (existingMode !== undefined) {
+          await fs.chmod(target, existingMode);
         }
       }
 
