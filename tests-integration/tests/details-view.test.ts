@@ -1,5 +1,6 @@
 import { test, expect } from "./base-test";
 import type { Frame, Page } from "@playwright/test";
+import { changeIdFromLogEntry, formatChangeIdShort, maxChangeIdPrefixLength } from "../../src/utils.js";
 
 async function findDetailsFrame(workbox: Page): Promise<Frame> {
   let detailsFrame: Frame | undefined;
@@ -58,20 +59,21 @@ test("details view shows the selected change and follows the graph selection", a
   });
 
   const commitB = (await testRepo.log("@-"))[0];
-  const commitBFullChangeId = commitB.change_id + (commitB.change_offset ? `/${commitB.change_offset}` : "");
+  const expectedShortChangeId = formatChangeIdShort(
+    changeIdFromLogEntry(commitB, maxChangeIdPrefixLength([commitB.change_id_shortest])),
+  );
 
   await test.step("single selection shows the change's details", async () => {
     await nodes.nth(1).click();
     await expect(nodes.nth(1)).toHaveAttribute("data-selected");
 
-    await expect(detailsFrame.locator(".detailsHeaderChangeId")).toHaveAttribute("title", commitBFullChangeId);
     // The Change ID row omits the offset suffix for this non-divergent change, even though jj
-    // reports one; only the header title keeps the full ID jj expects.
+    // reports one.
     const changeId = detailsFrame.locator(".detailsId").filter({ hasText: commitB.change_id });
     await expect(changeId).toHaveText(commitB.change_id);
     const commitId = detailsFrame.locator(".detailsId").filter({ hasText: commitB.commit_id });
     await expect(commitId).toHaveText(commitB.commit_id);
-    await expect(detailsFrame.locator(".detailsHeaderDescription")).toHaveText("commit B");
+    await expect(detailsFrame.locator(".detailsDescription")).toHaveText("commit B");
     await expect(detailsFrame.getByText("Test User <test@example.com>").first()).toBeVisible();
 
     const changedFile = detailsFrame.locator('[data-role="changed-file"][data-path="b.txt"]');
@@ -112,7 +114,7 @@ test("details view shows the selected change and follows the graph selection", a
     const menu = detailsFrame.locator("#id-context-menu");
 
     // The Change ID menu copies the full ID (without the unneeded offset, like the copy
-    // button) and the short change ID shown in the details header.
+    // button) and the short change ID as the graph view shows it.
     const changeIdValue = detailsFrame
       .locator(".detailsFieldRow")
       .filter({ hasText: "Change ID" })
@@ -120,7 +122,6 @@ test("details view shows the selected change and follows the graph selection", a
     await changeIdValue.click({ button: "right" });
     await expect(menu).toBeVisible();
     await expect(menu.locator("[data-action]")).toHaveText(["Copy", "Copy Short Change ID"]);
-    const expectedShortChangeId = await detailsFrame.locator(".detailsHeaderChangeId").textContent();
     await menu.locator('[data-action="copyShortId"]').click();
     await expect(menu).not.toBeVisible();
     await expect
@@ -240,7 +241,7 @@ test("details view shows the selected change and follows the graph selection", a
     await nodes.nth(2).click();
     await expect(nodes.nth(2)).toHaveAttribute("data-selected");
 
-    await expect(detailsFrame.locator(".detailsHeaderDescription")).toHaveText("commit A");
+    await expect(detailsFrame.locator(".detailsDescription")).toHaveText("commit A");
     const changedFileA = detailsFrame.locator('[data-role="changed-file"][data-path="a.txt"]');
     await expect(changedFileA).toBeVisible();
     await expect(changedFileA.locator(".detailsAdded")).toHaveText("+1");

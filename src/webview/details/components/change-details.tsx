@@ -168,14 +168,6 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
   const shortChangeId = formatShortChangeId(change.changeId);
   return (
     <div class="detailsContent">
-      <div class="detailsHeader">
-        <span class="detailsHeaderChangeId" title={change.changeId.changeId}>
-          {shortChangeId}
-        </span>
-        <span class="detailsHeaderDescription">
-          {change.description.split("\n")[0].trim() || "(no description set)"}
-        </span>
-      </div>
       <div class="detailsFields">
         <FieldRow label="Commit ID">
           <span
