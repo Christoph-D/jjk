@@ -82,6 +82,35 @@ test("details view shows the selected change and follows the graph selection", a
     await expect(changedFile.locator(".detailsRemoved")).toHaveCount(0);
   });
 
+  await test.step("bookmarks and tags rows appear only when populated", async () => {
+    await expect(detailsFrame.locator(".detailsFieldRow").filter({ hasText: "Bookmarks" })).toHaveCount(0);
+    await expect(detailsFrame.locator(".detailsFieldRow").filter({ hasText: "Tags" })).toHaveCount(0);
+
+    // A bookmark on the selected commit adds only the Bookmarks row.
+    await testRepo.jjCommand(["bookmark", "set", "-r", commitB.change_id, "topic"]);
+    const bookmarksRow = detailsFrame.locator(".detailsFieldRow").filter({ hasText: "Bookmarks" });
+    await expect(bookmarksRow).toBeVisible();
+    await expect(bookmarksRow.locator(".detailsPill")).toHaveText("topic");
+    await expect(detailsFrame.locator(".detailsFieldRow").filter({ hasText: "Tags" })).toHaveCount(0);
+
+    // A tag on the root commit adds only the Tags row. The root is an immutable head either
+    // way, so tagging it keeps the graph revset (and the node indices below) unchanged.
+    await testRepo.createTag("v1", "root()");
+    const rootNode = nodes.nth(3);
+    await rootNode.click();
+    await expect(rootNode).toHaveAttribute("data-selected");
+    const tagsRow = detailsFrame.locator(".detailsFieldRow").filter({ hasText: "Tags" });
+    await expect(tagsRow).toBeVisible();
+    await expect(tagsRow.locator(".detailsPill")).toHaveText("v1");
+    await expect(detailsFrame.locator(".detailsFieldRow").filter({ hasText: "Bookmarks" })).toHaveCount(0);
+
+    // Restore the commit B selection the later steps build on.
+    await nodes.nth(1).click();
+    await expect(detailsFrame.locator(".detailsId").filter({ hasText: commitB.change_id })).toHaveText(
+      commitB.change_id,
+    );
+  });
+
   await test.step("copy buttons copy the full change and commit IDs", async () => {
     const changeIdCopy = detailsFrame
       .locator(".detailsFieldRow")

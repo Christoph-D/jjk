@@ -62,6 +62,13 @@ function Signature({ signature }: { signature: SignatureWithTimestamp }) {
   );
 }
 
+// Remote refs of the git remote duplicate local refs, so hide those (mirroring the graph
+// view's commit tooltip).
+function filterRemoteRefs(localRefs: LogEntryLocalRef[], remoteRefs: LogEntryRemoteRef[]): LogEntryRemoteRef[] {
+  const localNames = new Set(localRefs.map((r) => r.name));
+  return remoteRefs.filter((r) => !(r.remote === "git" && localNames.has(r.name)));
+}
+
 function RefPills({
   localRefs,
   remoteRefs,
@@ -71,19 +78,12 @@ function RefPills({
   remoteRefs: LogEntryRemoteRef[];
   kind: "bookmark" | "tag";
 }) {
-  // Remote refs of the git remote duplicate local refs, so hide those (mirroring the graph
-  // view's commit tooltip).
-  const localNames = new Set(localRefs.map((r) => r.name));
-  const filteredRemoteRefs = remoteRefs.filter((r) => !(r.remote === "git" && localNames.has(r.name)));
-  if (localRefs.length === 0 && filteredRemoteRefs.length === 0) {
-    return <span class="detailsNoValue">(none)</span>;
-  }
   return (
     <span class="detailsPillList">
       {localRefs.map((r) => (
         <RefPill key={`local:${r.name}`} kind={kind} name={r.name} conflicted={r.conflict} unsynced={!r.synced} />
       ))}
-      {filteredRemoteRefs.map((r) => (
+      {remoteRefs.map((r) => (
         <RefPill key={`remote:${r.name}@${r.remote}`} kind={kind} name={r.name} remote={r.remote} />
       ))}
     </span>
@@ -166,6 +166,8 @@ function ChangedFileRow({ change, file }: { change: ChangeDetails; file: Changed
 
 export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
   const shortChangeId = formatShortChangeId(change.changeId);
+  const remoteBookmarks = filterRemoteRefs(change.localBookmarks, change.remoteBookmarks);
+  const remoteTags = filterRemoteRefs(change.localTags, change.remoteTags);
   return (
     <div class="detailsContent">
       <div class="detailsFields">
@@ -207,12 +209,16 @@ export function ChangeDetailsView({ change }: { change: ChangeDetails }) {
           </span>
           <CopyIdButton label="Change ID" value={formatFullChangeId(change.changeId)} />
         </FieldRow>
-        <FieldRow label="Bookmarks">
-          <RefPills localRefs={change.localBookmarks} remoteRefs={change.remoteBookmarks} kind="bookmark" />
-        </FieldRow>
-        <FieldRow label="Tags">
-          <RefPills localRefs={change.localTags} remoteRefs={change.remoteTags} kind="tag" />
-        </FieldRow>
+        {(change.localBookmarks.length > 0 || remoteBookmarks.length > 0) && (
+          <FieldRow label="Bookmarks">
+            <RefPills localRefs={change.localBookmarks} remoteRefs={remoteBookmarks} kind="bookmark" />
+          </FieldRow>
+        )}
+        {(change.localTags.length > 0 || remoteTags.length > 0) && (
+          <FieldRow label="Tags">
+            <RefPills localRefs={change.localTags} remoteRefs={remoteTags} kind="tag" />
+          </FieldRow>
+        )}
         <FieldRow label="Author">
           <Signature signature={change.author} />
         </FieldRow>
