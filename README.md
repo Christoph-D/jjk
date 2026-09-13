@@ -12,6 +12,7 @@ system.
 - Efficient: Defaults to showing up to 500 commits, can be configured to show more
 - Drag-and-drop for rebase, squash, move bookmarks/tags, and more
 - Context menus for change/bookmark/tag operations
+- Commit details view
 - Flexible configuration supports squash and edit workflows and more
 - Conflict resolution via the native VS Code merge editor
 - Bookmark and tag management with remote sync
@@ -89,6 +90,11 @@ system.
 - Split any change into two changes from the graph context menu, with an interactive selection  
   ![split view](images/split-view.png)
 - Supports renames, file mode changes, and more
+
+### 🔍 Details view
+
+- Show the details of the selected change similar to `jj show`, opened via the info button in the graph view toolbar  
+  ![details view](images/details-view.png)
 
 ### ⚠️ Conflicts
 

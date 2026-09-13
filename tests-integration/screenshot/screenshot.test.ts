@@ -185,7 +185,98 @@ test("take screenshot of jj graph for readme", async ({ userDataDir, graphFrame,
   });
 });
 
-test.only("take screenshot of conflicts", async ({ userDataDir, scmView, graphFrame, testRepo, workbox }) => {
+test("take screenshot of the details view", async ({ userDataDir, scmView, graphFrame, testRepo, workbox }) => {
+  const identityConfig = ["--config", "user.name=Some User", "--config", "user.email=code@example.com"];
+
+  await workbox.setViewportSize({ width: 1920, height: 1080 });
+  await initializeSettings(userDataDir, ZOOM_LEVEL);
+
+  // The change shown in the details view: modified, added, renamed, and deleted files plus a
+  // bookmark and a tag, so every part of the view has something to show.
+  await testRepo.writeFile("src/util.py", `${Array.from({ length: 8 }, (_, i) => `line ${i + 1}`).join("\n")}\n`);
+  await testRepo.writeFile("notes.txt", "Some notes\n");
+  await testRepo.writeFile("scratch.txt", "Scratch pad\n");
+  await testRepo.jjCommand(["commit", "-m", "initial commit", ...identityConfig]);
+
+  const lines = Array.from({ length: 8 }, (_, i) => `line ${i + 1}`);
+  lines[1] = "line 2 (reworded)";
+  lines.splice(4, 0, "line 4 (part a)", "line 4 (part b)");
+  await testRepo.writeFile("src/util.py", `${lines.join("\n")}\n`);
+  await testRepo.writeFile("src/main.py", 'from util import format_greeting\n\nprint(format_greeting("world"))\n');
+  await testRepo.deleteFile("notes.txt");
+  await testRepo.writeFile("docs/notes.md", "Some notes\n");
+  await testRepo.deleteFile("scratch.txt");
+  await testRepo.jjCommand(["commit", "-m", "feat: Support greeting formats", ...identityConfig]);
+  const featureCommit = (await testRepo.log("@-"))[0].change_id;
+  await testRepo.jjCommand(["bookmark", "set", "-r", featureCommit, "greeting-formats"]);
+  await testRepo.createTag("v0.2.0", featureCommit);
+
+  // Narrow the editor area so the details panel gets pleasant proportions for a screenshot.
+  const sash = workbox.locator(".monaco-sash.vertical").nth(1);
+  const sashBox = await sash.boundingBox();
+  if (!sashBox) {
+    throw new Error("Failed to resize editor area");
+  }
+  const viewportWidth = await workbox.evaluate(() => window.innerWidth);
+  const dragRight = viewportWidth - (sashBox.x + sashBox.width) - 680;
+  const sashCenterX = sashBox.x + sashBox.width / 2;
+  const sashCenterY = sashBox.y + sashBox.height / 2;
+  await workbox.mouse.move(sashCenterX, sashCenterY);
+  await workbox.mouse.down();
+  await workbox.mouse.move(sashCenterX + dragRight, sashCenterY);
+  await workbox.mouse.up();
+  await workbox.mouse.move(0, 0);
+
+  // Select the feature commit in the graph and open the details view from the graph toolbar.
+  const nodes = graphFrame.locator("#nodes > div");
+  await expect(nodes).toHaveCount(4);
+  await nodes.nth(1).click();
+
+  const graphPaneHeader = scmView.locator(".pane-header", { hasText: "JJ Graph" }).first();
+  await graphPaneHeader.getByRole("button", { name: "Show Details of Selected Change" }).click();
+
+  let detailsFrame: Frame | undefined;
+  await expect(async () => {
+    for (const frame of workbox.frames()) {
+      try {
+        if ((await frame.locator(".detailsRoot").count()) > 0) {
+          detailsFrame = frame;
+          return;
+        }
+      } catch {
+        // The frame can be mid-navigation while the webview (re)loads; just try the next.
+      }
+    }
+    throw new Error("Details view frame not ready");
+  }).toPass();
+
+  await expect(detailsFrame!.locator(".detailsDescription")).toHaveText("feat: Support greeting formats");
+  await expect(detailsFrame!.getByText("Some User <code@example.com>")).toHaveCount(2); // Author and Committer
+  await expect(detailsFrame!.locator('[data-role="changed-file"]')).toHaveCount(4);
+  const bookmarksRow = detailsFrame!.locator(".detailsFieldRow").filter({ hasText: "Bookmarks" });
+  await expect(bookmarksRow.locator(".detailsPill")).toHaveText("greeting-formats");
+  const tagsRow = detailsFrame!.locator(".detailsFieldRow").filter({ hasText: "Tags" });
+  await expect(tagsRow.locator(".detailsPill")).toHaveText("v0.2.0");
+
+  await workbox.mouse.move(0, 0);
+  await workbox.waitForTimeout(500);
+
+  const editorGroup = workbox.locator(".editor-group-container").filter({ hasText: "JJ Commit Details" });
+  const groupBox = await editorGroup.boundingBox();
+  const contentBox = await detailsFrame!.locator(".detailsContent").boundingBox();
+  if (!groupBox || !contentBox) {
+    throw new Error("Details view not laid out");
+  }
+
+  await screenshot(workbox, "details-view.png", {
+    x: scaleToZoomLevel(groupBox.x),
+    y: scaleToZoomLevel(groupBox.y),
+    width: scaleToZoomLevel(groupBox.width),
+    height: scaleToZoomLevel(contentBox.y + contentBox.height - groupBox.y) + 8,
+  });
+});
+
+test("take screenshot of conflicts", async ({ userDataDir, scmView, graphFrame, testRepo, workbox }) => {
   const sash = scmView.locator(".monaco-sash.horizontal").first();
   const sashBox = await sash.boundingBox();
   if (!sashBox) {
