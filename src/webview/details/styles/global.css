@@ -44,7 +44,7 @@ body {
 }
 
 .detailsContent {
-  padding: 8px 16px 32px;
+  padding: 20px 16px 32px;
 }
 
 .detailsFields {
@@ -117,7 +117,8 @@ body {
 
 .detailsDescriptionSection {
   margin-top: 14px;
-  margin-left: 16px;
+  padding: 2px 0 2px 10px;
+  border-left: 3px solid var(--vscode-textBlockQuote-border);
   user-select: text;
 }
 
