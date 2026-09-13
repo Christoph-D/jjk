@@ -46,7 +46,7 @@ export type FileStatus = {
   type: FileStatusType;
   file: string;
   path: RealPath;
-  renamedFrom?: string;
+  renamedFrom?: RealPath;
   // True when the file is listed in the change's conflicted files, even if it
   // also has a regular diff entry (e.g. in merges). Synthesized conflict
   // ("X") entries always carry this flag.

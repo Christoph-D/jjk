@@ -1043,7 +1043,9 @@ export class JJRepository {
       return {
         type: fileStatus.type,
         path: relativePath,
-        ...(fileStatus.renamedFrom !== undefined ? { renamedFrom: toForwardSlashes(fileStatus.renamedFrom) } : {}),
+        ...(fileStatus.renamedFrom !== undefined
+          ? { renamedFrom: toForwardSlashes(repositoryRelativePath(this.repositoryRoot, fileStatus.renamedFrom)) }
+          : {}),
         conflict: fileStatus.isConflict ?? fileStatus.type === "X",
         ...(counts && !counts.binary ? { linesAdded: counts.added, linesRemoved: counts.removed } : {}),
         ...(counts?.binary ? { binary: true } : {}),
@@ -1671,7 +1673,7 @@ export class JJRepository {
     );
   }
 
-  async restoreRetryImmutable(rev?: FullChangeId | "@", filepaths?: string[]) {
+  async restoreRetryImmutable(rev?: FullChangeId | "@", filepaths?: RealPath[]) {
     return this.retryWithImmutable(
       rev ?? "@",
       () => this.restore(rev, filepaths),
@@ -1681,7 +1683,7 @@ export class JJRepository {
     );
   }
 
-  private async restore(rev?: FullChangeId | "@", filepaths?: string[], ignoreImmutable = false) {
+  private async restore(rev?: FullChangeId | "@", filepaths?: RealPath[], ignoreImmutable = false) {
     return this.jjCommand([
       "restore",
       "--changes-in",
@@ -1915,8 +1917,10 @@ export class JJRepository {
     filepath = resolveRepositoryPath(filepath);
 
     const relativePath = toForwardSlashes(path.relative(this.repositoryRoot, filepath));
-    const filesetArgs = renamedFrom
-      ? [filepathToFileset(toForwardSlashes(renamedFrom)), filepathToFileset(relativePath)]
+    const relativeRenamedFrom =
+      renamedFrom !== undefined ? toForwardSlashes(path.relative(this.repositoryRoot, renamedFrom)) : undefined;
+    const filesetArgs = relativeRenamedFrom
+      ? [filepathToFileset(relativeRenamedFrom), filepathToFileset(relativePath)]
       : [filepathToFileset(relativePath)];
     logger.trace(`[getDiffOriginal] relativePath=${relativePath} filesetArgs=${JSON.stringify(filesetArgs)}`);
 
@@ -1924,7 +1928,7 @@ export class JJRepository {
     // renames. jj materializes only changed files into the snapshot, so an absent snapshot file
     // means the file was not modified in `rev` (or was added there).
     const { data } = await this.runDiffTool(["diff", "-r", rev], filesetArgs, ({ leftDir }) =>
-      readSnapshotFile(leftDir, renamedFrom ? toForwardSlashes(renamedFrom) : relativePath),
+      readSnapshotFile(leftDir, relativeRenamedFrom ?? relativePath),
     );
     logger.trace(
       `[getDiffOriginal] relativePath=${relativePath} original=${
@@ -2002,8 +2006,10 @@ export class JJRepository {
     // For renames, both the pre- and post-rename paths must be in the fileset: a target-only
     // fileset still reports `R {from => to}` in the summary but materializes an empty left
     // snapshot, hiding the pre-rename content (see getDiffOriginal for the same workaround).
-    const filesetArgs = renamedFrom
-      ? [filepathToFileset(toForwardSlashes(renamedFrom)), filepathToFileset(relativePath)]
+    const relativeRenamedFrom =
+      renamedFrom !== undefined ? toForwardSlashes(path.relative(this.repositoryRoot, renamedFrom)) : undefined;
+    const filesetArgs = relativeRenamedFrom
+      ? [filepathToFileset(relativeRenamedFrom), filepathToFileset(relativePath)]
       : [filepathToFileset(relativePath)];
 
     const { data } = await this.runDiffTool(
@@ -2011,7 +2017,7 @@ export class JJRepository {
       filesetArgs,
       async ({ leftDir, rightDir }) => {
         const [left, right] = await Promise.all([
-          readSnapshotFile(leftDir, renamedFrom ? toForwardSlashes(renamedFrom) : relativePath),
+          readSnapshotFile(leftDir, relativeRenamedFrom ?? relativePath),
           readSnapshotFile(rightDir, relativePath),
         ]);
         return { left, right };
@@ -2054,7 +2060,10 @@ export class JJRepository {
 
     return fileStatuses.map((fileStatus) => {
       const relativePath = toForwardSlashes(path.relative(this.repositoryRoot, fileStatus.path));
-      const renamedFrom = fileStatus.renamedFrom !== undefined ? toForwardSlashes(fileStatus.renamedFrom) : undefined;
+      const renamedFrom =
+        fileStatus.renamedFrom !== undefined
+          ? toForwardSlashes(path.relative(this.repositoryRoot, fileStatus.renamedFrom))
+          : undefined;
       const leftPath = fileStatus.type === "A" ? undefined : (renamedFrom ?? relativePath);
       const rightPath = fileStatus.type === "D" ? undefined : relativePath;
       const leftBuffer = leftPath !== undefined ? leftSnapshot.files.get(leftPath) : undefined;

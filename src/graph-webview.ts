@@ -613,7 +613,9 @@ export class JJGraphWebview implements vscode.WebviewViewProvider {
             beforeParams = { diffOriginalRev: changeId };
             afterParams = { deleted: true };
           } else if (status === "R" || status === "C") {
-            beforeParams = renamedFrom ? { diffOriginalRev: changeId, renamedFrom } : { diffOriginalRev: changeId };
+            beforeParams = renamedFrom
+              ? { diffOriginalRev: changeId, renamedFrom: joinRepositoryPath(repo.repositoryRoot, renamedFrom) }
+              : { diffOriginalRev: changeId };
             afterParams = { rev: changeId };
           } else {
             beforeParams = { diffOriginalRev: changeId };
@@ -1163,7 +1165,9 @@ function parseJJLogJson(
         ? entry.fileStatuses.map((f) => ({
             type: f.type,
             path: toForwardSlashes(repositoryRelativePath(repositoryRoot, f.path)),
-            ...(f.renamedFrom ? { renamedFrom: toForwardSlashes(f.renamedFrom) } : {}),
+            ...(f.renamedFrom
+              ? { renamedFrom: toForwardSlashes(repositoryRelativePath(repositoryRoot, f.renamedFrom)) }
+              : {}),
             conflict: f.isConflict ?? f.type === "X",
           }))
         : undefined;

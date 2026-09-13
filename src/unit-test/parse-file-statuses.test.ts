@@ -48,7 +48,8 @@ describe("parseFileStatuses Test Suite", () => {
     const f = fileStatuses[0];
     assert.equal(f.type, "R");
     assert.equal(f.file, "new.ts");
-    assert.equal(f.renamedFrom, "old.ts");
+    assert.ok(f.renamedFrom !== undefined && path.isAbsolute(f.renamedFrom));
+    assert.equal(f.renamedFrom, path.join(repoRoot, "old.ts"));
   });
 
   it("maps Copied entries with renamedFrom", () => {
@@ -60,7 +61,7 @@ describe("parseFileStatuses Test Suite", () => {
 
     assert.equal(fileStatuses.length, 1);
     assert.equal(fileStatuses[0].type, "C");
-    assert.equal(fileStatuses[0].renamedFrom, "orig.ts");
+    assert.equal(fileStatuses[0].renamedFrom, path.join(repoRoot, "orig.ts"));
   });
 
   it("synthesizes an X entry for conflicted paths not present in diff", () => {

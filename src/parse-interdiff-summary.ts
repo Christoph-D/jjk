@@ -27,7 +27,7 @@ export function parseInterdiffSummary(output: string, repositoryRoot: RealPath):
         type,
         file: path.basename(parseResult.toPath),
         path: fullPath,
-        renamedFrom: parseResult.fromPath,
+        renamedFrom: path.join(repositoryRoot, parseResult.fromPath) as RealPath,
       });
     } else {
       const fullPath = path.join(repositoryRoot, rest) as RealPath;

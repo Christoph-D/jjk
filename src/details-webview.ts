@@ -147,7 +147,9 @@ export class DetailsWebview implements vscode.Disposable {
           beforeParams = { diffOriginalRev: commitId };
           afterParams = { deleted: true };
         } else if (status === "R" || status === "C") {
-          beforeParams = renamedFrom ? { diffOriginalRev: commitId, renamedFrom } : { diffOriginalRev: commitId };
+          beforeParams = renamedFrom
+            ? { diffOriginalRev: commitId, renamedFrom: joinRepositoryPath(repo.repositoryRoot, renamedFrom) }
+            : { diffOriginalRev: commitId };
           afterParams = { rev: commitId };
         } else {
           beforeParams = { diffOriginalRev: commitId };

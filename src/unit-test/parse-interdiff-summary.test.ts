@@ -27,7 +27,8 @@ describe("parseInterdiffSummary Test Suite", () => {
 
     assert.equal(fileStatuses.length, 2);
     assert.equal(fileStatuses[0].type, "R");
-    assert.equal(fileStatuses[0].renamedFrom, path.normalize("old/name.ts").replace(/\\/g, "/"));
+    assert.ok(fileStatuses[0].renamedFrom !== undefined && path.isAbsolute(fileStatuses[0].renamedFrom));
+    assert.equal(fileStatuses[0].renamedFrom, path.join(repoRoot, "old/name.ts"));
     assert.equal(fileStatuses[1].type, "C");
     assert.equal(fileStatuses[1].file, "b.ts");
   });

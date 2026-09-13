@@ -43,7 +43,7 @@ export function parseFileStatuses(
         type: statusChar,
         file: path.basename(targetPath),
         path: fullPath,
-        renamedFrom: sourcePath,
+        renamedFrom: path.join(repositoryRoot, sourcePath) as RealPath,
         isConflict,
       };
     } else {
